@@ -10,7 +10,7 @@
    CONFIG — Replace GAS_URL with your deployed Apps Script URL
 ────────────────────────────────────────── */
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbyDpYjYN3QmLTcVmL7d7Xw8aHZUQaZNAbbutRWHnDJEyy9-gq4s7x5JxkrUXrOGGInR/exec',
   APP_NAME: 'i-LPG',
   VERSION: '1.0.0',
   TOKEN_KEY: 'ilpg_token',
