@@ -1,5 +1,5 @@
 /**
- * i-LPG Profile & Settings Module
+ * Ilpg/i-lpg Profile & Settings Module
  * Shared across Driver, Admin, HRD — opened as modal
  */
 

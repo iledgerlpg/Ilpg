@@ -1,4 +1,4 @@
-# 📖 i-LPG — Panduan Deployment
+# 📖 Ilpg/i-lpg — Panduan Deployment
 
 **Sistem Manajemen Distribusi LPG Enterprise**  
 Versi 1.0.0 | Multi-Tenant | PWA Ready
@@ -8,7 +8,7 @@ Versi 1.0.0 | Multi-Tenant | PWA Ready
 ## 🏗️ Struktur Folder
 
 ```
-i-lpg/
+Ilpg/i-lpg/
 ├── index.html              # Halaman login
 ├── registerpt.html         # Pendaftaran perusahaan baru (otomatis)
 ├── offline.html            # Fallback PWA saat offline
@@ -36,13 +36,13 @@ i-lpg/
 ### STEP 1 — Buat Google Spreadsheet Master
 
 1. Buka [Google Sheets](https://sheets.google.com)
-2. Buat spreadsheet baru, beri nama **"i-LPG Master"**
+2. Buat spreadsheet baru, beri nama **"Ilpg/i-lpg Master"**
 3. Salin **Spreadsheet ID** dari URL:  
    `https://docs.google.com/spreadsheets/d/`**`1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms`**`/edit`
 
 ### STEP 2 — Buat Spreadsheet per Perusahaan
 
-1. Buat spreadsheet baru untuk setiap perusahaan, misal: **"i-LPG - PT Demo Energi"**
+1. Buat spreadsheet baru untuk setiap perusahaan, misal: **"Ilpg/i-lpg - PT Demo Energi"**
 2. Salin Spreadsheet ID-nya juga
 
 ### STEP 3 — Setup Google Apps Script
@@ -80,7 +80,7 @@ Di Apps Script Editor:
 1. Klik menu **Deploy** → **New Deployment**
 2. Klik ikon ⚙️ → pilih **Web app**
 3. Konfigurasi:
-   - **Description**: i-LPG API v1.0
+   - **Description**: Ilpg/i-lpg API v1.0
    - **Execute as**: Me (your account)
    - **Who has access**: Anyone
 4. Klik **Deploy**
@@ -97,15 +97,15 @@ Ganti `YOUR_SCRIPT_ID` dengan URL lengkap dari Step 5.
 ### STEP 7 — Deploy ke GitHub Pages
 
 ```bash
-# 1. Buat repository GitHub baru: "i-lpg"
+# 1. Buat repository GitHub baru: "Ilpg/i-lpg"
 git init
 git add .
-git commit -m "Initial i-LPG deployment"
-git remote add origin https://github.com/USERNAME/i-lpg.git
+git commit -m "Initial Ilpg/i-lpg deployment"
+git remote add origin https://github.com/USERNAME/Ilpg/i-lpg.git
 git push -u origin main
 
 # 2. Di GitHub: Settings → Pages → Source: main branch → /root
-# 3. Akses: https://USERNAME.github.io/i-lpg/
+# 3. Akses: https://USERNAME.github.io/Ilpg/i-lpg/
 ```
 
 ---
@@ -280,4 +280,4 @@ TOKEN_EXPIRY_HOURS: 8,   /* Ubah jam sesi */
 
 ---
 
-*i-LPG v1.0.0 — Enterprise LPG Distribution Management System*
+*Ilpg/i-lpg v1.0.0 — Enterprise LPG Distribution Management System*

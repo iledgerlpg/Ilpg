@@ -4,9 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <meta name="theme-color" content="#E85D04"/>
-  <title>i-LPG — HRD</title>
-  <link rel="manifest" href="/i-lpg/manifest.json"/>
-  <link rel="apple-touch-icon" href="/i-lpg/assets/icons/icon-192.png"/>
+  <title>Ilpg/i-lpg — HRD</title>
+  <link rel="manifest" href="/Ilpg/i-lpg/manifest.json"/>
+  <link rel="apple-touch-icon" href="/Ilpg/i-lpg/assets/icons/icon-192.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -18,7 +18,7 @@
     <a class="sidebar-brand" href="#">
       <div class="brand-icon">⛽</div>
       <div class="brand-text">
-        <div class="brand-name">i-LPG</div>
+        <div class="brand-name">Ilpg/i-lpg</div>
         <div class="brand-sub">HRD Portal</div>
       </div>
     </a>
@@ -990,7 +990,7 @@ async function doLogout() {
   const ok = await Alert.confirm('Keluar?','Anda akan keluar dari sistem.');
   if(!ok) return;
   await API.logout();
-  window.location.href='/i-lpg/index.html';
+  window.location.href='/Ilpg/i-lpg/index.html';
 }
 
 async function markAllRead() {
@@ -1003,6 +1003,6 @@ Sidebar.init();
 Notif.init();
 Page.go('dashboard');
 </script>
-<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/i-lpg/sw.js').catch(()=>{});</script>
+<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/Ilpg/i-lpg/sw.js').catch(()=>{});</script>
 </body>
 </html>

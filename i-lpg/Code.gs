@@ -1,5 +1,5 @@
 /**
- * i-LPG Backend — Google Apps Script
+ * Ilpg/i-lpg Backend — Google Apps Script
  * =====================================
  * Deploy sebagai Web App:
  *   Execute as: Me
@@ -14,7 +14,7 @@ const GAS_CONFIG = {
   MASTER_SS_ID: 'YOUR_MASTER_SPREADSHEET_ID', // Ganti dengan ID Master Spreadsheet
   TOKEN_EXPIRY_HOURS: 8,
   DEFAULT_PASSWORD: 'ilpg123',
-  APP_NAME: 'i-LPG',
+  APP_NAME: 'Ilpg/i-lpg',
   VERSION: '1.0.0',
 };
 
@@ -477,7 +477,7 @@ function actionRegisterCompany(params) {
     }
 
     // ── 4. Buat Spreadsheet baru secara otomatis ──
-    const newSS = SpreadsheetApp.create(`i-LPG — ${companyName} [${companyCode}]`);
+    const newSS = SpreadsheetApp.create(`Ilpg/i-lpg — ${companyName} [${companyCode}]`);
     const newSSId = newSS.getId();
 
     // Hapus sheet default "Sheet1" setelah sheet lain dibuat (tidak boleh hapus sheet terakhir)
@@ -1486,7 +1486,7 @@ function setupCompanySpreadsheet(companyCode) {
    ERROR LOGGING
 ══════════════════════════════════════════════ */
 function logError(context, error) {
-  console.error(`[i-LPG Error] ${context}: ${error.message}`);
+  console.error(`[Ilpg/i-lpg Error] ${context}: ${error.message}`);
   try {
     const master = getMasterSS();
     const sheet  = getOrCreateSheet(master, 'ErrorLog',

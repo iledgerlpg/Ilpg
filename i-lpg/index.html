@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="theme-color" content="#E85D04" />
-  <meta name="description" content="i-LPG — Sistem Manajemen Distribusi LPG Enterprise" />
-  <title>i-LPG — Login</title>
+  <meta name="description" content="Ilpg/i-lpg — Sistem Manajemen Distribusi LPG Enterprise" />
+  <title>Ilpg/i-lpg — Login</title>
 
   <!-- PWA -->
-  <link rel="manifest" href="/i-lpg/manifest.json" />
-  <link rel="apple-touch-icon" href="/i-lpg/assets/icons/icon-192.png" />
+  <link rel="manifest" href="/Ilpg/i-lpg/manifest.json" />
+  <link rel="apple-touch-icon" href="/Ilpg/i-lpg/assets/icons/icon-192.png" />
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -119,7 +119,7 @@
     <!-- Logo -->
     <div class="login-logo">
       <div class="logo-icon">⛽</div>
-      <h1>i-LPG</h1>
+      <h1>Ilpg/i-lpg</h1>
       <p>Sistem Manajemen Distribusi LPG</p>
     </div>
 
@@ -192,7 +192,7 @@
   </div>
 </div>
 
-<div class="login-version">i-LPG v1.0 © 2024 — Enterprise LPG Distribution</div>
+<div class="login-version">Ilpg/i-lpg v1.0 © 2024 — Enterprise LPG Distribution</div>
 
 <div id="toast-container" class="toast-container"></div>
 
@@ -215,7 +215,7 @@
 
   function redirectByRole(role) {
     const map = { driver: 'pages/driver.html', admin: 'pages/admin.html', hrd: 'pages/hrd.html' };
-    window.location.href = '/i-lpg/' + (map[role] || 'pages/driver.html');
+    window.location.href = '/Ilpg/i-lpg/' + (map[role] || 'pages/driver.html');
   }
 
   // ── Load company list
@@ -367,7 +367,7 @@
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/i-lpg/sw.js')
+      navigator.serviceWorker.register('/Ilpg/i-lpg/sw.js')
         .then(() => console.log('SW registered'))
         .catch(e => console.warn('SW error:', e));
     });

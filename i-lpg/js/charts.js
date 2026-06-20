@@ -1,5 +1,5 @@
 /**
- * i-LPG Charts & Analytics Module
+ * Ilpg/i-lpg Charts & Analytics Module
  * Advanced visualizations for all dashboards
  */
 
@@ -454,7 +454,7 @@ const Report = {
         <div class="header">
           <div class="logo">⛽</div>
           <div class="brand">
-            <h1>i-LPG</h1>
+            <h1>Ilpg/i-lpg</h1>
             <p>Sistem Manajemen Distribusi LPG Enterprise</p>
           </div>
         </div>
@@ -492,7 +492,7 @@ const Report = {
         </table>
 
         <div class="footer">
-          i-LPG v1.0 &nbsp;|&nbsp; Dicetak otomatis oleh sistem &nbsp;|&nbsp; © ${new Date().getFullYear()}
+          Ilpg/i-lpg v1.0 &nbsp;|&nbsp; Dicetak otomatis oleh sistem &nbsp;|&nbsp; © ${new Date().getFullYear()}
         </div>
       </body>
       </html>`;
@@ -528,7 +528,7 @@ const Report = {
         tr:nth-child(even) td { background: #f9f9f9; }
       </style></head>
       <body>
-        <div class="header"><h1>⛽ i-LPG — ${title}</h1>
+        <div class="header"><h1>⛽ Ilpg/i-lpg — ${title}</h1>
         <p style="color:#888;font-size:11px">Dicetak: ${Fmt.datetime(new Date().toISOString())}</p></div>
         <table>
           <thead><tr><th>Nama</th><th>Role</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Status</th></tr></thead>
@@ -568,7 +568,7 @@ const Report = {
       </style></head>
       <body>
         <div class="header">
-          <div><h1>⛽ i-LPG — ${title}</h1>
+          <div><h1>⛽ Ilpg/i-lpg — ${title}</h1>
           <p style="color:#888;font-size:11px">Periode: ${month} &nbsp;|&nbsp; Dicetak: ${Fmt.datetime(new Date().toISOString())}</p></div>
           <div style="text-align:right"><div style="font-size:22px;font-weight:900;color:#E85D04">${Fmt.currency(total)}</div>
           <div style="font-size:11px;color:#888">Total Bagi Hasil</div></div>
@@ -874,7 +874,7 @@ const PWAInstall = {
         position:fixed;bottom:0;left:0;right:0;z-index:9000;box-shadow:0 -4px 20px rgba(0,0,0,0.15)">
         <span style="font-size:28px">📲</span>
         <div style="flex:1">
-          <div style="font-weight:700;font-size:14px;color:var(--text-primary)">Install i-LPG</div>
+          <div style="font-weight:700;font-size:14px;color:var(--text-primary)">Install Ilpg/i-lpg</div>
           <div style="font-size:12px;color:var(--text-secondary)">Tambahkan ke layar utama untuk akses lebih cepat</div>
         </div>
         <button onclick="PWAInstall.install()" style="background:var(--primary);color:white;border:none;
@@ -893,7 +893,7 @@ const PWAInstall = {
     if (!this.prompt) return;
     this.prompt.prompt();
     const { outcome } = await this.prompt.userChoice;
-    if (outcome === 'accepted') Toast.success('Terinstall!', 'i-LPG berhasil ditambahkan ke layar utama.');
+    if (outcome === 'accepted') Toast.success('Terinstall!', 'Ilpg/i-lpg berhasil ditambahkan ke layar utama.');
     this.dismiss();
   },
 

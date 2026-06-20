@@ -1,5 +1,5 @@
 /**
- * i-LPG Core JavaScript
+ * Ilpg/i-lpg Core JavaScript
  * Enterprise LPG Distribution Management
  * ==========================================
  */
@@ -11,7 +11,7 @@
 ────────────────────────────────────────── */
 const CONFIG = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycbyDpYjYN3QmLTcVmL7d7Xw8aHZUQaZNAbbutRWHnDJEyy9-gq4s7x5JxkrUXrOGGInR/exec',
-  APP_NAME: 'i-LPG',
+  APP_NAME: 'Ilpg/i-lpg',
   VERSION: '1.0.0',
   TOKEN_KEY: 'ilpg_token',
   USER_KEY:  'ilpg_user',
@@ -46,14 +46,14 @@ const Auth = {
   },
   requireAuth() {
     if (!this.isLoggedIn()) {
-      window.location.href = '/i-lpg/index.html';
+      window.location.href = '/Ilpg/i-lpg/index.html';
     }
   },
   requireRole(...roles) {
     const user = this.getUser();
     if (!user || !roles.includes(user.role)) {
       Toast.show('Akses ditolak', 'Anda tidak memiliki hak akses halaman ini.', 'error');
-      setTimeout(() => window.location.href = '/i-lpg/index.html', 1500);
+      setTimeout(() => window.location.href = '/Ilpg/i-lpg/index.html', 1500);
     }
   }
 };
@@ -80,7 +80,7 @@ const API = {
 
       if (data.status === 'unauthorized') {
         Auth.clearSession();
-        window.location.href = '/i-lpg/index.html';
+        window.location.href = '/Ilpg/i-lpg/index.html';
         return null;
       }
 
@@ -514,7 +514,7 @@ const Camera = {
     ctx.fillRect(12, canvasEl.height - 34, 90, 22);
     ctx.fillStyle = 'white';
     ctx.font = 'bold 12px sans-serif';
-    ctx.fillText('i-LPG', 20, canvasEl.height - 18);
+    ctx.fillText('Ilpg/i-lpg', 20, canvasEl.height - 18);
 
     return canvasEl.toDataURL('image/jpeg', 0.85);
   },
@@ -717,7 +717,7 @@ const Export = {
     if (!el) return;
     const win = window.open('', '_blank');
     win.document.write(`
-      <html><head><title>i-LPG Export</title>
+      <html><head><title>Ilpg/i-lpg Export</title>
       <style>body{font-family:sans-serif;font-size:12px} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ddd;padding:6px}</style>
       </head><body>${el.innerHTML}</body></html>`);
     win.print(); win.close();
