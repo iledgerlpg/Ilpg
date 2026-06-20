@@ -69,7 +69,7 @@ const API = {
     try {
       const opts = {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload),
       };
 
