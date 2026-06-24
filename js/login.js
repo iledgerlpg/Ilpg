@@ -1,4 +1,4 @@
-<script>
+
   // ── Theme init before render to prevent flash
   (function() {
     const t = localStorage.getItem('ilpg_theme') || 'light';
@@ -180,4 +180,3 @@
         .catch(e => console.warn('SW error:', e));
     });
   }
-</script>
