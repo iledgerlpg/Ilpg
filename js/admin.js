@@ -1344,7 +1344,6 @@ async function markAllRead() {
 Sidebar.init();
 Notif.init();
 Page.go('dashboard');
-</script>
 
 /* ── Production error handler (no demo fallback) ── */
 function apiErr(e, containerIdOrEl) {
