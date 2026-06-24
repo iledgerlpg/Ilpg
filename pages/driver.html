@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#E85D04" />
+  <title>i-LPG — Driver</title>
+  <link rel="manifest" href="/Ilpg/i-lpg/manifest.json" />
+  <link rel="apple-touch-icon" href="/Ilpg/i-lpg/assets/icons/icon-192.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="driver">
+
+<div class="app-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-brand" href="#">
+      <div class="brand-icon">⛽</div>
+      <div class="brand-text">
+        <div class="brand-name">i-LPG</div>
+        <div class="brand-sub">Driver Portal</div>
+      </div>
+    </a>
+
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <div class="menu-section">
+        <div class="menu-label">Utama</div>
+        <button class="nav-item active" data-page="dashboard" onclick="Page.go('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+        <button class="nav-item" data-page="absensi" onclick="Page.go('absensi')">
+          <span class="nav-icon">📍</span>
+          <span class="nav-label">Absensi</span>
+        </button>
+        <button class="nav-item" data-page="riwayat-absensi" onclick="Page.go('riwayat-absensi')">
+          <span class="nav-icon">📅</span>
+          <span class="nav-label">Riwayat Absensi</span>
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-label">Pengiriman</div>
+        <button class="nav-item" data-page="tugas-saya" onclick="Page.go('tugas-saya')">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">Tugas Saya</span>
+          <span class="nav-badge" id="badge-tugas">0</span>
+        </button>
+        <button class="nav-item" data-page="tugas-global" onclick="Page.go('tugas-global')">
+          <span class="nav-icon">🌐</span>
+          <span class="nav-label">Jadwal Global</span>
+        </button>
+        <button class="nav-item" data-page="laporan-kirim" onclick="Page.go('laporan-kirim')">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Laporan Pengiriman</span>
+        </button>
+        <button class="nav-item" data-page="riwayat-kirim" onclick="Page.go('riwayat-kirim')">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">Riwayat Laporan</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="Profile.open()" style="cursor:pointer">
+        <div class="user-avatar" id="user-avatar">D</div>
+        <div class="sidebar-footer-text">
+          <div class="user-name" id="user-name">Driver</div>
+          <div class="user-role">🚚 Driver</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content" id="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+        <div>
+          <div class="page-title" id="page-title">Dashboard</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-toggle" title="Toggle tema">
+          <span class="theme-toggle-icon">🌙</span>
+        </button>
+        <button class="topbar-btn" id="notif-btn" title="Notifikasi">
+          🔔
+          <span class="notif-dot" id="notif-dot" style="display:none"></span>
+        </button>
+        <button class="topbar-btn" onclick="doLogout()" title="Keluar" style="font-size:16px">🚪</button>
+      </div>
+    </header>
+
+    <main class="page-content" id="page-content">
+      <!-- rendered by JS -->
+    </main>
+  </div>
+
+  <!-- Notification Panel -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-header">
+      <span class="fw-700">Notifikasi</span>
+      <button class="btn btn-sm btn-ghost" onclick="markAllRead()">Semua dibaca</button>
+    </div>
+    <div class="notif-list" id="notif-list"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Modals injected dynamically -->
+<div id="modal-root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/charts.js"></script>
+<script src="../js/profile.js"></script>
+<script>
+/* ───── DRIVER APP ───── */
+
+(function() {
+  const t = localStorage.getItem('ilpg_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+
+// Auth check
+Auth.requireAuth();
+Auth.requireRole('driver');
+
+const user = Auth.getUser();
+document.getElementById('user-name').textContent = user?.name || 'Driver';
+document.getElementById('user-avatar').textContent = (user?.name || 'D')[0].toUpperCase();
+
+/* ── Page navigation ── */
+const Page = {
+  current: 'dashboard',
+
+  go(name, params = {}) {
+    this.current = name;
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.page === name);
+    });
+
+    const titles = {
+      dashboard: 'Dashboard',
+      absensi: 'Absensi',
+      'riwayat-absensi': 'Riwayat Absensi',
+      'tugas-saya': 'Tugas Saya',
+      'tugas-global': 'Jadwal Global',
+      'laporan-kirim': 'Laporan Pengiriman',
+      'riwayat-kirim': 'Riwayat Laporan',
+    };
+    document.getElementById('page-title').textContent = titles[name] || name;
+
+    const pages = {
+      dashboard: renderDashboard,
+      absensi: renderAbsensi,
+      'riwayat-absensi': renderRiwayatAbsensi,
+      'tugas-saya': renderTugasSaya,
+      'tugas-global': renderTugasGlobal,
+      'laporan-kirim': renderLaporanKirim,
+      'riwayat-kirim': renderRiwayatKirim,
+    };
+
+    const fn = pages[name];
+    if (fn) fn();
+    Sidebar.closeMobile();
+  },
+};
+
+/* ── Dashboard ── */
+async function renderDashboard() {
+  const content = document.getElementById('page-content');
+  content.innerHTML = `
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-h">Selamat Datang, ${user?.name?.split(' ')[0] || 'Driver'} 👋</div>
+        <div class="page-sub">${Fmt.date(new Date().toISOString())} — ${getGreeting()}</div>
+      </div>
+    </div>
+
+    <div class="grid-4 mb-6" id="stat-cards">
+      ${statCardSkeleton(4)}
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📦</span> Tugas Hari Ini</div>
+          <button class="btn btn-sm btn-outline" onclick="Page.go('tugas-saya')">Lihat Semua</button>
+        </div>
+        <div class="card-body" id="today-tasks"><div class="skeleton" style="height:80px;border-radius:8px"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📅</span> Status Absensi Hari Ini</div>
+        </div>
+        <div class="card-body" id="today-absensi">
+          <div class="skeleton" style="height:80px;border-radius:8px"></div>
+        </div>
+      </div>
+    </div>`;
+
+  try {
+    const res = await API.getDashboardStats();
+    if (res?.status === 'ok') {
+      const d = res.data || {};
+      document.getElementById('stat-cards').innerHTML = `
+        ${statCard('📦', d.total_today || 0, 'Total Hari Ini', 'orange')}
+        ${statCard('✅', d.selesai || 0, 'Selesai', 'green')}
+        ${statCard('⏳', d.pending || 0, 'Pending', 'yellow')}
+        ${statCard('🚚', d.dikirim || 0, 'Dalam Perjalanan', 'blue')}`;
+
+      document.getElementById('today-tasks').innerHTML = renderTodayTasksMini(d.tasks || []);
+      document.getElementById('today-absensi').innerHTML = renderAbsensiStatus(d.absensi);
+      document.getElementById('badge-tugas').textContent = d.pending || 0;
+    }
+  } catch (e) {
+    apiErr(e, 'stat-cards');
+    apiErr(e, 'today-tasks');
+    apiErr(e, 'today-absensi');
+  }
+}
+
+function renderTodayTasksMini(tasks) {
+  if (!tasks?.length) return `<div class="empty-state" style="padding:16px"><div class="empty-icon">✅</div><div class="empty-title">Tidak ada tugas hari ini</div></div>`;
+  return tasks.slice(0, 3).map(t => `
+    <div class="d-flex gap-3 mb-3" style="align-items:center">
+      <div style="flex:1">
+        <div class="fw-600 text-base">${t.pangkalan || '-'}</div>
+        <div class="text-sm text-secondary">${t.spbe} — ${Fmt.number(t.jumlah)} tabung</div>
+      </div>
+      ${Fmt.statusBadge(t.status)}
+    </div>`).join('');
+}
+
+function renderAbsensiStatus(absensi) {
+  if (!absensi) {
+    return `
+      <div class="d-flex gap-3 mb-3">
+        <div class="stat-icon orange">🌅</div>
+        <div><div class="text-sm text-secondary">Masuk</div><div class="fw-600">Belum absen</div></div>
+      </div>
+      <button class="btn btn-primary w-full" onclick="Page.go('absensi')">Absen Sekarang</button>`;
+  }
+  return `
+    <div class="d-flex gap-3 mb-3">
+      <div class="stat-icon green">✅</div>
+      <div><div class="text-sm text-secondary">Masuk</div><div class="fw-600">${Fmt.time(absensi.checkin_time)}</div></div>
+    </div>
+    ${absensi.checkout_time ? `
+    <div class="d-flex gap-3">
+      <div class="stat-icon blue">🌆</div>
+      <div><div class="text-sm text-secondary">Pulang</div><div class="fw-600">${Fmt.time(absensi.checkout_time)}</div></div>
+    </div>` : `<button class="btn btn-outline w-full" onclick="Page.go('absensi')">Absen Pulang</button>`}`;
+}
+
+/* ── Absensi ── */
+let cameraActive = false;
+let capturedPhoto = null;
+let gpsData = null;
+let attendanceMode = 'in'; // 'in' or 'out'
+
+async function renderAbsensi() {
+  const content = document.getElementById('page-content');
+  content.innerHTML = `
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-h">Absensi</div>
+        <div class="page-sub">Absensi dengan GPS & Kamera Realtime</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- GPS Widget -->
+      <div class="card">
+        <div class="card-header"><div class="card-title"><span class="icon">📍</span> Lokasi GPS</div></div>
+        <div class="card-body">
+          <div class="gps-widget" id="gps-widget">
+            <div class="gps-icon">📡</div>
+            <div class="gps-info">
+              <div class="gps-label">Koordinat</div>
+              <div class="gps-coords" id="gps-coords">Mendapatkan lokasi...</div>
+              <div class="gps-status loading" id="gps-status">⏳ Memuat GPS...</div>
+            </div>
+          </div>
+          <div class="map-container mt-3">
+            <div class="map-placeholder" id="map-placeholder">
+              <span style="font-size:32px">🗺️</span>
+              <span>Menunggu GPS...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Camera Capture -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📷</span> Foto Selfie</div>
+          <span class="badge badge-warning">Kamera Langsung</span>
+        </div>
+        <div class="card-body">
+          <div id="camera-section">
+            <div class="camera-container" id="cam-container" style="display:none">
+              <video id="cam-video" autoplay playsinline muted></video>
+              <div class="camera-overlay">
+                <div class="camera-watermark" id="cam-watermark">
+                  <div id="wm-name">${user?.name || 'Driver'}</div>
+                  <div id="wm-datetime">Loading...</div>
+                  <div id="wm-location">GPS: menunggu...</div>
+                </div>
+                <div></div>
+              </div>
+            </div>
+            <canvas id="cam-canvas" style="display:none"></canvas>
+
+            <div id="photo-placeholder" class="upload-zone" style="cursor:default" onclick="startCamera()">
+              <div class="upload-icon">📷</div>
+              <div class="upload-text">Tekan tombol untuk membuka kamera</div>
+              <div class="upload-sub">Foto tidak bisa diambil dari galeri</div>
+            </div>
+
+            <div id="photo-result" style="display:none">
+              <div class="photo-preview">
+                <img id="captured-img" src="" alt="Foto Absensi" />
+                <button class="photo-retake" onclick="retakePhoto()">🔄 Ulang</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Type selector -->
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="tabs" id="absensi-tabs">
+          <button class="tab active" onclick="setAbsensiMode('in', this)">🌅 Absen Masuk</button>
+          <button class="tab" onclick="setAbsensiMode('out', this)">🌆 Absen Pulang</button>
+        </div>
+
+        <div class="mt-4">
+          <div class="alert alert-info mb-4">
+            <span class="alert-icon">ℹ️</span>
+            <div class="alert-body">Pastikan GPS aktif dan foto jelas menampilkan wajah Anda. Foto harus diambil langsung dari kamera, bukan dari galeri.</div>
+          </div>
+
+          <div class="d-flex gap-3">
+            <button class="btn btn-primary flex-1" id="btn-start-camera" onclick="startCamera()">
+              📷 Buka Kamera
+            </button>
+            <button class="btn btn-success flex-1" id="btn-capture" onclick="capturePhoto()" style="display:none">
+              📸 Ambil Foto
+            </button>
+            <button class="btn btn-primary flex-1" id="btn-submit-absensi" onclick="submitAbsensi()" disabled>
+              ✅ Kirim Absensi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // Start GPS
+  initGPS();
+  startWatermarkClock();
+}
+
+function setAbsensiMode(mode, btn) {
+  attendanceMode = mode;
+  document.querySelectorAll('#absensi-tabs .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  capturedPhoto = null;
+  document.getElementById('photo-placeholder').style.display = 'block';
+  document.getElementById('photo-result').style.display = 'none';
+  document.getElementById('btn-submit-absensi').disabled = true;
+  stopCamera();
+}
+
+async function initGPS() {
+  const coordsEl = document.getElementById('gps-coords');
+  const statusEl = document.getElementById('gps-status');
+
+  try {
+    gpsData = await GPS.getLocation();
+
+    if (!GPS.validate(gpsData)) {
+      statusEl.className = 'gps-status error';
+      statusEl.textContent = '⚠️ Lokasi tidak valid (di luar Indonesia)';
+      return;
+    }
+
+    coordsEl.textContent = `${gpsData.lat}, ${gpsData.lng}`;
+    statusEl.className = 'gps-status ready';
+    statusEl.textContent = `✅ Akurasi: ±${gpsData.accuracy}m`;
+
+    const wmLoc = document.getElementById('wm-location');
+    if (wmLoc) wmLoc.textContent = `GPS: ${gpsData.lat}, ${gpsData.lng}`;
+
+    // Map placeholder with link
+    document.getElementById('map-placeholder').innerHTML = `
+      <a href="https://maps.google.com/?q=${gpsData.lat},${gpsData.lng}" target="_blank" class="btn btn-sm btn-outline">
+        🗺️ Buka di Google Maps
+      </a>
+      <div class="text-sm text-secondary mt-2">${gpsData.lat}, ${gpsData.lng}</div>`;
+
+  } catch (e) {
+    statusEl.className = 'gps-status error';
+    statusEl.textContent = '❌ GPS gagal: ' + e.message;
+    Toast.error('GPS Error', 'Aktifkan GPS di perangkat Anda.');
+  }
+}
+
+let watermarkTimer;
+function startWatermarkClock() {
+  const update = () => {
+    const dt = document.getElementById('wm-datetime');
+    if (dt) dt.textContent = DateUtil.formatTimestamp();
+  };
+  update();
+  watermarkTimer = setInterval(update, 1000);
+}
+
+async function startCamera() {
+  const video = document.getElementById('cam-video');
+  const container = document.getElementById('cam-container');
+  const placeholder = document.getElementById('photo-placeholder');
+  const btnStart = document.getElementById('btn-start-camera');
+  const btnCapture = document.getElementById('btn-capture');
+
+  const ok = await Camera.start(video);
+  if (!ok) {
+    Toast.error('Kamera Error', 'Tidak bisa membuka kamera. Pastikan izin kamera sudah diberikan.');
+    return;
+  }
+
+  cameraActive = true;
+  container.style.display = 'block';
+  placeholder.style.display = 'none';
+  btnStart.style.display = 'none';
+  btnCapture.style.display = 'flex';
+}
+
+function stopCamera() {
+  Camera.stop();
+  cameraActive = false;
+  const container = document.getElementById('cam-container');
+  const btnStart = document.getElementById('btn-start-camera');
+  const btnCapture = document.getElementById('btn-capture');
+  if (container) container.style.display = 'none';
+  if (btnStart) btnStart.style.display = 'flex';
+  if (btnCapture) btnCapture.style.display = 'none';
+}
+
+function capturePhoto() {
+  if (!cameraActive) return;
+  if (!gpsData) {
+    Toast.warning('Tunggu GPS', 'Lokasi GPS belum tersedia.');
+    return;
+  }
+
+  const video = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+
+  capturedPhoto = Camera.capture(video, canvas, {
+    name: user?.name || 'Driver',
+    date: Fmt.date(new Date().toISOString()),
+    time: Fmt.time(new Date().toISOString()),
+    location: `${gpsData.lat}, ${gpsData.lng}`,
+  });
+
+  // Show preview
+  document.getElementById('captured-img').src = capturedPhoto;
+  document.getElementById('photo-result').style.display = 'block';
+  document.getElementById('btn-submit-absensi').disabled = false;
+  stopCamera();
+  document.getElementById('btn-capture').style.display = 'none';
+}
+
+function retakePhoto() {
+  capturedPhoto = null;
+  document.getElementById('photo-result').style.display = 'none';
+  document.getElementById('photo-placeholder').style.display = 'block';
+  document.getElementById('btn-start-camera').style.display = 'flex';
+  document.getElementById('btn-submit-absensi').disabled = true;
+}
+
+async function submitAbsensi() {
+  if (!capturedPhoto) { Toast.warning('Foto Diperlukan', 'Ambil foto terlebih dahulu.'); return; }
+  if (!gpsData)       { Toast.warning('GPS Diperlukan', 'Tunggu GPS selesai.'); return; }
+
+  const confirm = await Alert.confirm(
+    attendanceMode === 'in' ? 'Konfirmasi Absen Masuk' : 'Konfirmasi Absen Pulang',
+    `Lokasi: ${gpsData.lat}, ${gpsData.lng}. Lanjutkan?`
+  );
+  if (!confirm) return;
+
+  Loading.show('Mengirim absensi...');
+  try {
+    const fn = attendanceMode === 'in' ? API.checkin : API.checkout;
+    const res = await fn.call(API, {
+      type: attendanceMode,
+      lat: gpsData.lat,
+      lng: gpsData.lng,
+      accuracy: gpsData.accuracy,
+      photo: capturedPhoto,
+      timestamp: DateUtil.now(),
+    });
+
+    if (res?.status === 'ok') {
+      Toast.success('Absensi Berhasil!', attendanceMode === 'in' ? 'Selamat bekerja!' : 'Selamat beristirahat!');
+      Page.go('dashboard');
+    } else {
+      Toast.error('Gagal', res?.message || 'Terjadi kesalahan.');
+    }
+  } catch (e) {
+    Toast.error('Koneksi Error', 'Periksa koneksi internet Anda.');
+  } finally {
+    Loading.hide();
+  }
+}
+
+/* ── Riwayat Absensi ── */
+async function renderRiwayatAbsensi() {
+  const content = document.getElementById('page-content');
+  content.innerHTML = `
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-h">Riwayat Absensi</div>
+        <div class="page-sub">Rekap kehadiran Anda</div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="filter-bar">
+        <div class="tabs" style="flex:none">
+          <button class="tab active" onclick="filterAbsensi('hari', this)">Hari Ini</button>
+          <button class="tab" onclick="filterAbsensi('minggu', this)">Minggu Ini</button>
+          <button class="tab" onclick="filterAbsensi('bulan', this)">Bulan Ini</button>
+        </div>
+        <input type="date" class="form-control" id="filter-date" style="width:160px" onchange="filterAbsensiDate(this.value)" />
+      </div>
+    </div>
+
+    <div id="absensi-list">
+      <div class="skeleton" style="height:120px;border-radius:12px"></div>
+    </div>`;
+
+  loadRiwayatAbsensi('hari');
+}
+
+async function filterAbsensi(period, btn) {
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  loadRiwayatAbsensi(period);
+}
+
+async function filterAbsensiDate(date) {
+  loadRiwayatAbsensi('custom', { date });
+}
+
+async function loadRiwayatAbsensi(period = 'hari', extra = {}) {
+  const listEl = document.getElementById('absensi-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="skeleton" style="height:120px;border-radius:12px"></div>';
+
+  try {
+    const res = await API.getAttendance({ period, ...extra });
+    const data = res?.data || [];
+
+    if (!data.length) {
+      listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div>
+        <div class="empty-title">Tidak ada data absensi</div></div>`;
+      return;
+    }
+
+    listEl.innerHTML = data.map(d => `
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex gap-3 mb-3" style="align-items:center">
+            <div class="stat-icon orange">📅</div>
+            <div class="flex-1">
+              <div class="fw-700">${Fmt.date(d.date)}</div>
+              ${Fmt.statusBadge(d.status)}
+            </div>
+          </div>
+          <div class="grid-2 gap-3">
+            <div>
+              <div class="text-sm text-secondary mb-1">🌅 Masuk</div>
+              <div class="fw-600">${d.checkin_time ? Fmt.time(d.checkin_time) : '-'}</div>
+              ${d.checkin_lat ? `<div class="text-sm text-muted" style="font-family:var(--font-mono)">${d.checkin_lat}, ${d.checkin_lng}</div>` : ''}
+              ${d.checkin_photo ? `<img src="${d.checkin_photo}" style="width:100%;border-radius:8px;margin-top:8px" />` : ''}
+            </div>
+            <div>
+              <div class="text-sm text-secondary mb-1">🌆 Pulang</div>
+              <div class="fw-600">${d.checkout_time ? Fmt.time(d.checkout_time) : '-'}</div>
+              ${d.checkout_lat ? `<div class="text-sm text-muted" style="font-family:var(--font-mono)">${d.checkout_lat}, ${d.checkout_lng}</div>` : ''}
+              ${d.checkout_photo ? `<img src="${d.checkout_photo}" style="width:100%;border-radius:8px;margin-top:8px" />` : ''}
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch (e) { apiErr(e, listEl); }
+}
+
+/* ── Tugas Saya ── */
+async function renderTugasSaya() {
+  const content = document.getElementById('page-content');
+  content.innerHTML = `
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-h">Tugas Saya</div>
+        <div class="page-sub">Daftar jadwal pengiriman Anda</div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="filter-bar">
+        <div class="select-wrapper">
+          <select class="form-control" id="filter-status-tugas" onchange="loadTugasSaya()" style="width:160px">
+            <option value="">Semua Status</option>
+            <option value="pending">Pending</option>
+            <option value="dikirim">Sedang Dikirim</option>
+            <option value="selesai">Selesai</option>
+          </select>
+        </div>
+        <input type="date" class="form-control" id="filter-date-tugas" onchange="loadTugasSaya()" style="width:160px" />
+      </div>
+    </div>
+
+    <div id="tugas-list">
+      <div class="skeleton" style="height:200px;border-radius:12px"></div>
+    </div>`;
+
+  loadTugasSaya();
+}
+
+async function loadTugasSaya() {
+  const listEl = document.getElementById('tugas-list');
+  if (!listEl) return;
+
+  const status = document.getElementById('filter-status-tugas')?.value;
+  const date   = document.getElementById('filter-date-tugas')?.value;
+
+  listEl.innerHTML = '<div class="skeleton" style="height:200px;border-radius:12px"></div>';
+
+  try {
+    const res = await API.getDeliveries({ driver_only: true, status, date });
+    const data = res?.data || [];
+
+    if (!data.length) {
+      listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div>
+        <div class="empty-title">Tidak ada tugas</div></div>`;
+      return;
+    }
+
+    listEl.innerHTML = data.map(d => `
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex gap-3 mb-3" style="align-items:center">
+            <div class="flex-1">
+              <div class="d-flex gap-2 mb-1" style="align-items:center">
+                <span class="text-sm text-muted" style="font-family:var(--font-mono)">${Fmt.deliveryNo(d.id)}</span>
+                ${Fmt.statusBadge(d.status)}
+              </div>
+              <div class="fw-700 text-lg">${d.pangkalan || '-'}</div>
+            </div>
+          </div>
+
+          <div class="grid-2 gap-3 mb-3">
+            <div><div class="text-sm text-secondary">🏭 SPBE</div><div class="fw-600">${d.spbe || '-'}</div></div>
+            <div><div class="text-sm text-secondary">📦 Jumlah</div><div class="fw-600">${Fmt.number(d.jumlah)} tabung</div></div>
+            <div><div class="text-sm text-secondary">📅 Tanggal</div><div class="fw-600">${Fmt.date(d.tanggal)}</div></div>
+            <div><div class="text-sm text-secondary">🚗 Driver</div><div class="fw-600">${d.driver_name || 'Saya'}</div></div>
+          </div>
+
+          <div class="d-flex gap-2">
+            ${d.status === 'pending' ? `
+              <button class="btn btn-primary btn-sm" onclick="mulaiPengiriman('${d.id}')">🚚 Mulai Kirim</button>
+              <button class="btn btn-outline btn-sm" onclick="requestTakeover('${d.id}')">🔄 Alihkan</button>
+            ` : ''}
+            ${d.status === 'dikirim' ? `
+              <button class="btn btn-success btn-sm" onclick="buatLaporan('${d.id}', '${d.pangkalan}')">📝 Buat Laporan</button>
+            ` : ''}
+          </div>
+        </div>
+      </div>`).join('');
+  } catch (e) { apiErr(e, listEl); }
+}
+
+
+async function mulaiPengiriman(id) {
+  const ok = await Alert.confirm('Mulai Pengiriman?', 'Status akan berubah menjadi "Sedang Dikirim".');
+  if (!ok) return;
+  Loading.show();
+  try {
+    const res = await API.updateDelivery(id, { status: 'dikirim' });
+    if (res?.status === 'ok') {
+      Toast.success('Pengiriman Dimulai', 'Status berhasil diperbarui.');
+      loadTugasSaya();
+    }
+  } catch (e) { Toast.error('Gagal', 'Tidak dapat memperbarui status.'); }
+  finally { Loading.hide(); }
+}
+
+async function requestTakeover(id) {
+  const ok = await Alert.confirm('Alihkan Jadwal?', 'Jadwal ini akan tersedia untuk driver lain.');
+  if (!ok) return;
+  Loading.show();
+  try {
+    const res = await API.takeoverDelivery(id);
+    if (res?.status === 'ok') {
+      Toast.success('Berhasil', 'Jadwal telah dialihkan.');
+      loadTugasSaya();
+    }
+  } catch (e) { Toast.error('Gagal', 'Tidak dapat mengalihkan jadwal.'); }
+  finally { Loading.hide(); }
+}
+
+function buatLaporan(id, pangkalan) {
+  Page.go('laporan-kirim', { deliveryId: id, pangkalan });
+}
+
+/* ── Tugas Global ── */
+async function renderTugasGlobal() {
+  const content = document.getElementById('page-content');
+  content.innerHTML = `
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-h">Jadwal Global</div>
+        <div class="page-sub">Semua jadwal pengiriman hari ini</div>
+      </div>
+    </div>
+
+    <div id="global-list">
+      <div class="skeleton" style="height:200px;border-radius:12px"></div>
+    </div>`;
+
+  try {
+    const res = await API.getDeliveries({ date: DateUtil.today() });
+    const data = res?.data || [];
+    const listEl = document.getElementById('global-list');
+
+    if (!data.length) {
+      listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🌐</div>
+        <div class="empty-title">Tidak ada jadwal global hari ini</div></div>`;
+      return;
+    }
+
+    listEl.innerHTML = `
+      <div class="table-wrapper card">
+        <table>
+          <thead><tr>
+            <th>No. Pengiriman</th><th>Driver</th><th>SPBE</th>
+            <th>Jumlah</th><th>Pangkalan</th><th>Status</th><th>Aksi</th>
+          </tr></thead>
+          <tbody>${data.map(d => `
+            <tr>
+              <td><span style="font-family:var(--font-mono);font-size:12px">${Fmt.deliveryNo(d.id)}</span></td>
+              <td class="fw-600">${d.driver_name}</td>
+              <td>${d.spbe}</td>
+              <td>${Fmt.number(d.jumlah)} tbg</td>
+              <td>${d.pangkalan}</td>
+              <td>${Fmt.statusBadge(d.status)}</td>
+              <td>${d.status === 'pending' && d.driver_id !== user?.id ? `
+                <button class="btn btn-sm btn-outline" onclick="ambilAlih('${d.id}')">Ambil Alih</button>
+              ` : '-'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (e) { apiErr(e, 'global-list'); }
+}
+
+async function ambilAlih(id) {
+  const ok = await Alert.confirm('Ambil Alih Jadwal?', 'Anda akan mengambil alih jadwal pengiriman ini.');
+  if (!ok) return;
+  Loading.show();
+  try {
+    const res = await API.takeoverDelivery(id);
+    if (res?.status === 'ok') {
+      Toast.success('Berhasil!', 'Jadwal berhasil diambil alih.');
+      renderTugasGlobal();
+    }
+  } catch { Toast.error('Gagal', 'Tidak dapat mengambil alih.'); }
+  finally { Loading.hide(); }
+}
+
+/* ── Laporan Pengiriman ── */
+let laporanPhoto = null;
+let laporanGPS = null;
+
+async function renderLaporanKirim(params = {}) {
+  const content = document.getElementById('page-content');
+  content.innerHTML = `
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-h">Laporan Pengiriman</div>
+        <div class="page-sub">Input hasil pengiriman LPG</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><span class="icon">📝</span> Form Laporan</div></div>
+      <div class="card-body">
+        <form id="laporan-form">
+          <div class="grid-2 gap-4">
+            <div class="form-group">
+              <label class="form-label">No. Pengiriman <span class="required">*</span></label>
+              <div class="select-wrapper">
+                <select class="form-control" name="delivery_id" id="sel-delivery" required>
+                  <option value="">-- Pilih Pengiriman --</option>
+                </select>
+              </div>
+              <div class="form-error error-delivery_id"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Pangkalan Tujuan</label>
+              <input type="text" class="form-control" name="pangkalan" id="laporan-pangkalan" readonly
+                placeholder="Otomatis dari jadwal" style="background:var(--bg-input)" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Jumlah Terkirim (tabung) <span class="required">*</span></label>
+              <input type="number" class="form-control" name="jumlah_kirim" min="1" required placeholder="0" />
+              <div class="form-error error-jumlah_kirim"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Status Pengiriman <span class="required">*</span></label>
+              <div class="select-wrapper">
+                <select class="form-control" name="status" required>
+                  <option value="">-- Pilih Status --</option>
+                  <option value="selesai">✅ Selesai</option>
+                  <option value="sebagian">⚠️ Sebagian</option>
+                  <option value="batal">❌ Batal</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Keterangan</label>
+            <textarea class="form-control" name="keterangan" rows="3" placeholder="Catatan pengiriman..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Foto Bukti Pengiriman <span class="required">*</span></label>
+            <div class="camera-container" id="laporan-cam-container" style="display:none">
+              <video id="laporan-cam-video" autoplay playsinline muted></video>
+            </div>
+            <canvas id="laporan-cam-canvas" style="display:none"></canvas>
+
+            <div id="laporan-photo-placeholder" class="upload-zone">
+              <div class="upload-icon">📷</div>
+              <div class="upload-text">Foto harus dari kamera langsung</div>
+              <div class="upload-sub">Tidak bisa menggunakan galeri</div>
+            </div>
+
+            <div id="laporan-photo-result" style="display:none" class="photo-preview">
+              <img id="laporan-captured-img" src="" />
+              <button type="button" class="photo-retake" onclick="retakeLaporan()">🔄 Ulang</button>
+            </div>
+
+            <div class="d-flex gap-2 mt-2">
+              <button type="button" class="btn btn-ghost" id="laporan-btn-camera" onclick="startLaporanCamera()">📷 Buka Kamera</button>
+              <button type="button" class="btn btn-outline" id="laporan-btn-capture" onclick="captureLaporan()" style="display:none">📸 Ambil Foto</button>
+            </div>
+          </div>
+
+          <!-- GPS -->
+          <div class="gps-widget mb-4" id="laporan-gps-widget">
+            <div class="gps-icon">📡</div>
+            <div class="gps-info">
+              <div class="gps-label">Lokasi Pengiriman</div>
+              <div class="gps-coords" id="laporan-gps-coords">Mendapatkan lokasi...</div>
+              <div class="gps-status loading" id="laporan-gps-status">⏳ Memuat GPS...</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full btn-lg">
+            📤 Kirim Laporan
+          </button>
+        </form>
+      </div>
+    </div>`;
+
+  // Load deliveries dropdown
+  loadLaporanDeliveries();
+  initLaporanGPS();
+
+  // Auto-fill from params
+  if (params.deliveryId) {
+    setTimeout(() => {
+      const sel = document.getElementById('sel-delivery');
+      if (sel) sel.value = params.deliveryId;
+      if (params.pangkalan) document.getElementById('laporan-pangkalan').value = params.pangkalan;
+    }, 500);
+  }
+
+  document.getElementById('laporan-form').addEventListener('submit', submitLaporan);
+  document.getElementById('sel-delivery').addEventListener('change', function() {
+    // Populate pangkalan from selection
+    const opt = this.options[this.selectedIndex];
+    if (opt.dataset.pangkalan) document.getElementById('laporan-pangkalan').value = opt.dataset.pangkalan;
+  });
+}
+
+async function loadLaporanDeliveries() {
+  try {
+    const res = await API.getDeliveries({ driver_only: true, status: 'dikirim' });
+    const sel = document.getElementById('sel-delivery');
+    (res?.data || []).forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = `${Fmt.deliveryNo(d.id)} — ${d.pangkalan}`;
+      opt.dataset.pangkalan = d.pangkalan;
+      sel.appendChild(opt);
+    });
+  } catch {}
+}
+
+async function initLaporanGPS() {
+  try {
+    laporanGPS = await GPS.getLocation();
+    document.getElementById('laporan-gps-coords').textContent = `${laporanGPS.lat}, ${laporanGPS.lng}`;
+    document.getElementById('laporan-gps-status').className = 'gps-status ready';
+    document.getElementById('laporan-gps-status').textContent = `✅ ±${laporanGPS.accuracy}m`;
+  } catch (e) {
+    document.getElementById('laporan-gps-status').className = 'gps-status error';
+    document.getElementById('laporan-gps-status').textContent = '❌ GPS gagal';
+  }
+}
+
+async function startLaporanCamera() {
+  const video = document.getElementById('laporan-cam-video');
+  const ok = await Camera.start(video);
+  if (!ok) { Toast.error('Kamera Error', 'Tidak bisa membuka kamera.'); return; }
+  document.getElementById('laporan-cam-container').style.display = 'block';
+  document.getElementById('laporan-photo-placeholder').style.display = 'none';
+  document.getElementById('laporan-btn-camera').style.display = 'none';
+  document.getElementById('laporan-btn-capture').style.display = 'flex';
+}
+
+function captureLaporan() {
+  const video  = document.getElementById('laporan-cam-video');
+  const canvas = document.getElementById('laporan-cam-canvas');
+  laporanPhoto = Camera.capture(video, canvas, {
+    name: user?.name,
+    date: Fmt.date(new Date().toISOString()),
+    time: Fmt.time(new Date().toISOString()),
+    location: laporanGPS ? `${laporanGPS.lat}, ${laporanGPS.lng}` : 'GPS N/A',
+  });
+  document.getElementById('laporan-captured-img').src = laporanPhoto;
+  document.getElementById('laporan-photo-result').style.display = 'block';
+  document.getElementById('laporan-cam-container').style.display = 'none';
+  document.getElementById('laporan-btn-capture').style.display = 'none';
+  Camera.stop();
+}
+
+function retakeLaporan() {
+  laporanPhoto = null;
+  document.getElementById('laporan-photo-result').style.display = 'none';
+  document.getElementById('laporan-photo-placeholder').style.display = 'block';
+  document.getElementById('laporan-btn-camera').style.display = 'flex';
+}
+
+async function submitLaporan(e) {
+  e.preventDefault();
+  if (!laporanPhoto) { Toast.warning('Foto Diperlukan', 'Ambil foto bukti pengiriman.'); return; }
+
+  const formData = Form.getData('laporan-form');
+  if (!formData.delivery_id) { Toast.warning('Pilih Pengiriman', 'Pilih nomor pengiriman terlebih dahulu.'); return; }
+
+  Loading.show('Mengirim laporan...');
+  try {
+    const res = await API.reportDelivery({
+      ...formData,
+      photo: laporanPhoto,
+      lat: laporanGPS?.lat,
+      lng: laporanGPS?.lng,
+      timestamp: DateUtil.now(),
+    });
+
+    if (res?.status === 'ok') {
+      Toast.success('Laporan Terkirim!', 'Laporan pengiriman berhasil disimpan.');
+      laporanPhoto = null;
+      Page.go('riwayat-kirim');
+    } else {
+      Toast.error('Gagal', res?.message || 'Terjadi kesalahan.');
+    }
+  } catch (e) {
+    Toast.error('Koneksi Error', 'Periksa koneksi internet.');
+  } finally {
+    Loading.hide();
+  }
+}
+
+/* ── Riwayat Laporan ── */
+async function renderRiwayatKirim() {
+  const content = document.getElementById('page-content');
+  content.innerHTML = `
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-h">Riwayat Laporan</div>
+        <div class="page-sub">Semua laporan pengiriman Anda</div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="filter-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Cari pangkalan..." id="search-riwayat" oninput="filterRiwayat()" />
+        </div>
+        <div class="select-wrapper">
+          <select class="form-control" id="filter-riwayat-status" onchange="filterRiwayat()" style="width:160px">
+            <option value="">Semua Status</option>
+            <option value="selesai">Selesai</option>
+            <option value="sebagian">Sebagian</option>
+            <option value="batal">Batal</option>
+          </select>
+        </div>
+        <input type="month" class="form-control" id="filter-riwayat-month" style="width:160px" onchange="filterRiwayat()" />
+      </div>
+    </div>
+
+    <div id="riwayat-list">
+      <div class="skeleton" style="height:200px;border-radius:12px"></div>
+    </div>`;
+
+  loadRiwayatKirim();
+}
+
+let allRiwayat = [];
+async function loadRiwayatKirim() {
+  try {
+    const res = await API.getDeliveries({ driver_only: true, has_report: true });
+    allRiwayat = res?.data || [];
+    renderRiwayatList(allRiwayat);
+  } catch (e) { apiErr(e, 'riwayat-list'); }
+}
+
+function filterRiwayat() {
+  const search = document.getElementById('search-riwayat')?.value?.toLowerCase();
+  const status = document.getElementById('filter-riwayat-status')?.value;
+  const month  = document.getElementById('filter-riwayat-month')?.value;
+
+  let filtered = allRiwayat;
+  if (search) filtered = filtered.filter(d => d.pangkalan?.toLowerCase().includes(search));
+  if (status) filtered = filtered.filter(d => d.status === status);
+  if (month)  filtered = filtered.filter(d => d.tanggal?.startsWith(month));
+
+  renderRiwayatList(filtered);
+}
+
+function renderRiwayatList(data) {
+  const listEl = document.getElementById('riwayat-list');
+  if (!listEl) return;
+
+  if (!data?.length) {
+    listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div>
+      <div class="empty-title">Tidak ada laporan</div></div>`;
+    return;
+  }
+
+  listEl.innerHTML = data.map(d => `
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex gap-3 mb-3" style="align-items:center">
+          <div class="flex-1">
+            <div class="d-flex gap-2 mb-1">
+              <span class="text-sm text-muted">${Fmt.date(d.tanggal)}</span>
+              ${Fmt.statusBadge(d.status)}
+            </div>
+            <div class="fw-700">${d.pangkalan || '-'}</div>
+          </div>
+          <div class="text-right">
+            <div class="fw-800 text-xl text-primary-c">${Fmt.number(d.jumlah_kirim)}</div>
+            <div class="text-sm text-secondary">tabung</div>
+          </div>
+        </div>
+        ${d.keterangan ? `<div class="text-sm text-secondary mb-2">📝 ${d.keterangan}</div>` : ''}
+        ${d.photo ? `<img src="${d.photo}" style="width:100%;max-width:200px;border-radius:8px" onclick="viewPhoto('${d.photo}')" />` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function viewPhoto(src) {
+  Modal.create({
+    id: 'modal-photo',
+    title: 'Foto Bukti',
+    body: `<img src="${src}" style="width:100%;border-radius:8px" />`,
+  });
+  Modal.open('modal-photo');
+}
+
+/* ── Helpers ── */
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Selamat Pagi ☀️';
+  if (h < 15) return 'Selamat Siang 🌤️';
+  if (h < 18) return 'Selamat Sore 🌅';
+  return 'Selamat Malam 🌙';
+}
+
+function statCard(icon, value, label, color) {
+  return `
+    <div class="stat-card">
+      <div class="stat-icon ${color}">${icon}</div>
+      <div class="stat-body">
+        <div class="stat-label">${label}</div>
+        <div class="stat-value">${Fmt.number(value)}</div>
+      </div>
+    </div>`;
+}
+
+function statCardSkeleton(count) {
+  return Array(count).fill(0).map(() =>
+    `<div class="skeleton" style="height:90px;border-radius:12px"></div>`).join('');
+}
+
+async function doLogout() {
+  const ok = await Alert.confirm('Keluar?', 'Anda akan keluar dari sistem.');
+  if (!ok) return;
+  await API.logout();
+  window.location.href = '/Ilpg/i-lpg/index.html';
+}
+
+async function markAllRead() {
+  await API.markNotifRead([]);
+  Notif.updateBadge(0);
+  document.getElementById('notif-list').innerHTML = `
+    <div class="empty-state"><div class="empty-icon">✅</div>
+      <div class="empty-title">Semua sudah dibaca</div></div>`;
+}
+
+/* ── Init ── */
+Sidebar.init();
+Notif.init();
+Page.go('dashboard');
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/Ilpg/i-lpg/sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
