@@ -2,7 +2,7 @@
   "name": "i-LPG — Distribusi LPG",
   "short_name": "i-LPG",
   "description": "Sistem Manajemen Distribusi LPG Enterprise",
-  "start_url": "/Ilpg/i-lpg/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#1A1A2E",
@@ -23,14 +23,14 @@
       "name": "Dashboard Driver",
       "short_name": "Driver",
       "description": "Buka halaman driver",
-      "url": "/Ilpg/i-lpg/pages/driver.html",
+      "url": "pages/driver.html",
       "icons": [{ "src": "assets/icons/icon-96.png", "sizes": "96x96" }]
     },
     {
       "name": "Dashboard Admin",
       "short_name": "Admin",
       "description": "Buka halaman admin",
-      "url": "/Ilpg/i-lpg/pages/admin.html",
+      "url": "pages/admin.html",
       "icons": [{ "src": "assets/icons/icon-96.png", "sizes": "96x96" }]
     }
   ],

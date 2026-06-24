@@ -8,8 +8,8 @@
   <title>i-LPG — Login</title>
 
   <!-- PWA -->
-  <link rel="manifest" href="/Ilpg/i-lpg/manifest.json" />
-  <link rel="apple-touch-icon" href="/Ilpg/i-lpg/assets/icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -219,7 +219,7 @@
       admin:  'pages/admin.html',
       hrd:    'pages/hrd.html',
     };
-    window.location.href = '/Ilpg/i-lpg/' + (map[role] || 'pages/driver.html');
+    window.location.href = '' + (map[role] || 'pages/driver.html');
   }
 
   // ── Load company list from API (no demo fallback — shows real companies only)
@@ -377,7 +377,7 @@
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/Ilpg/i-lpg/sw.js')
+      navigator.serviceWorker.register('sw.js')
         .then(() => console.log('SW registered'))
         .catch(e => console.warn('SW error:', e));
     });

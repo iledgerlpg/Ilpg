@@ -46,14 +46,14 @@ const Auth = {
   },
   requireAuth() {
     if (!this.isLoggedIn()) {
-      window.location.href = '/Ilpg/i-lpg/index.html';
+      window.location.href = 'index.html';
     }
   },
   requireRole(...roles) {
     const user = this.getUser();
     if (!user || !roles.includes(user.role)) {
       Toast.show('Akses ditolak', 'Anda tidak memiliki hak akses halaman ini.', 'error');
-      setTimeout(() => window.location.href = '/Ilpg/i-lpg/index.html', 1500);
+      setTimeout(() => window.location.href = 'index.html', 1500);
     }
   }
 };
@@ -82,7 +82,7 @@ const API = {
 
       if (data.status === 'unauthorized') {
         Auth.clearSession();
-        window.location.href = '/Ilpg/i-lpg/index.html';
+        window.location.href = 'index.html';
         return null;
       }
 

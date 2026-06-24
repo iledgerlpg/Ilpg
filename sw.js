@@ -9,16 +9,16 @@ const API_CACHE    = 'ilpg-api-v1';
 
 // Files to cache for offline use
 const STATIC_ASSETS = [
-  '/Ilpg/i-lpg/',
-  '/Ilpg/i-lpg/index.html',
-  '/Ilpg/i-lpg/offline.html',
-  '/Ilpg/i-lpg/css/style.css',
-  '/Ilpg/i-lpg/js/app.js',
-  '/Ilpg/i-lpg/js/charts.js',
-  '/Ilpg/i-lpg/manifest.json',
-  '/Ilpg/i-lpg/pages/driver.html',
-  '/Ilpg/i-lpg/pages/admin.html',
-  '/Ilpg/i-lpg/pages/hrd.html',
+  '',
+  'index.html',
+  'offline.html',
+  'css/style.css',
+  'js/app.js',
+  'js/charts.js',
+  'manifest.json',
+  'pages/driver.html',
+  'pages/admin.html',
+  'pages/hrd.html',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
@@ -102,8 +102,8 @@ async function networkFirst(request) {
 
 function offlineFallback(request) {
   if (request.headers.get('accept')?.includes('text/html')) {
-    return caches.match('/Ilpg/i-lpg/offline.html')
-      .then(res => res || caches.match('/Ilpg/i-lpg/index.html'));
+    return caches.match('offline.html')
+      .then(res => res || caches.match('index.html'));
   }
   return new Response(
     JSON.stringify({ status: 'offline', message: 'Tidak ada koneksi internet.' }),
@@ -118,10 +118,10 @@ self.addEventListener('push', event => {
   event.waitUntil(
     self.registration.showNotification(data.title || 'i-LPG', {
       body: data.body || '',
-      icon: '/Ilpg/i-lpg/assets/icons/icon-192.png',
-      badge: '/Ilpg/i-lpg/assets/icons/icon-72.png',
+      icon: 'assets/icons/icon-192.png',
+      badge: 'assets/icons/icon-72.png',
       tag: data.tag || 'ilpg-notif',
-      data: data.url || '/Ilpg/i-lpg/',
+      data: data.url || '',
     })
   );
 });
@@ -129,6 +129,6 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(
-    clients.openWindow(event.notification.data || '/Ilpg/i-lpg/')
+    clients.openWindow(event.notification.data || '')
   );
 });
