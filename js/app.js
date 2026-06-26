@@ -10,7 +10,7 @@
    CONFIG
 ────────────────────────────────────────── */
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbyDpYjYN3QmLTcVmL7d7Xw8aHZUQaZNAbbutRWHnDJEyy9-gq4s7x5JxkrUXrOGGInR/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbwznvveZkHDw_ri4t5vy7E8PhdDg2qRBw2_11lj3f1WGDgfga0NbtEoJ19dccfQJ03Xaw/exec',
   APP_NAME: 'i-LPG',
   VERSION: '1.0.0',
   TOKEN_KEY: 'ilpg_token',
