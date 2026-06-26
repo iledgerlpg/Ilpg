@@ -499,15 +499,23 @@ async function submitAbsensi() {
   );
   if (!confirm) return;
 
-  Loading.show('Mengirim absensi...');
+  Loading.show('Mengupload foto ke Drive...');
   try {
-    const fn = attendanceMode === 'in' ? API.checkin : API.checkout;
+    // 1. Upload foto ke Google Drive dulu, dapat URL
+    const photoUrl = await API.uploadPhoto(
+      capturedPhoto,
+      attendanceMode === 'in' ? 'absensi_in' : 'absensi_out'
+    );
+
+    // 2. Kirim data absensi dengan URL (bukan base64)
+    Loading.show(attendanceMode === 'in' ? 'Menyimpan absen masuk...' : 'Menyimpan absen pulang...');
+    const fn  = attendanceMode === 'in' ? API.checkin : API.checkout;
     const res = await fn.call(API, {
-      type: attendanceMode,
-      lat: gpsData.lat,
-      lng: gpsData.lng,
-      accuracy: gpsData.accuracy,
-      photo: capturedPhoto,
+      type:      attendanceMode,
+      lat:       gpsData.lat,
+      lng:       gpsData.lng,
+      accuracy:  gpsData.accuracy,
+      photo:     photoUrl,          // URL Drive, bukan base64
       timestamp: DateUtil.now(),
     });
 
@@ -518,7 +526,7 @@ async function submitAbsensi() {
       Toast.error('Gagal', res?.message || 'Terjadi kesalahan.');
     }
   } catch (e) {
-    Toast.error('Koneksi Error', 'Periksa koneksi internet Anda.');
+    Toast.error('Gagal', e?.message || 'Periksa koneksi internet Anda.');
   } finally {
     Loading.hide();
   }
@@ -977,13 +985,18 @@ async function submitLaporan(e) {
   const formData = Form.getData('laporan-form');
   if (!formData.delivery_id) { Toast.warning('Pilih Pengiriman', 'Pilih nomor pengiriman terlebih dahulu.'); return; }
 
-  Loading.show('Mengirim laporan...');
+  Loading.show('Mengupload foto bukti ke Drive...');
   try {
+    // 1. Upload foto ke Google Drive dulu
+    const photoUrl = await API.uploadPhoto(laporanPhoto, 'laporan');
+
+    // 2. Kirim laporan dengan URL (bukan base64)
+    Loading.show('Menyimpan laporan...');
     const res = await API.reportDelivery({
       ...formData,
-      photo: laporanPhoto,
-      lat: laporanGPS?.lat,
-      lng: laporanGPS?.lng,
+      photo:     photoUrl,      // URL Drive
+      lat:       laporanGPS?.lat,
+      lng:       laporanGPS?.lng,
       timestamp: DateUtil.now(),
     });
 
@@ -995,7 +1008,7 @@ async function submitLaporan(e) {
       Toast.error('Gagal', res?.message || 'Terjadi kesalahan.');
     }
   } catch (e) {
-    Toast.error('Koneksi Error', 'Periksa koneksi internet.');
+    Toast.error('Gagal', e?.message || 'Periksa koneksi internet.');
   } finally {
     Loading.hide();
   }
