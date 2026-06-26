@@ -10,7 +10,7 @@
    CONFIG
 ────────────────────────────────────────── */
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbwznvveZkHDw_ri4t5vy7E8PhdDg2qRBw2_11lj3f1WGDgfga0NbtEoJ19dccfQJ03Xaw/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbyJ00NbRuHbRoIwN6Ve2YlO-KjKPaA9JYlgKSpL8aAwzmw3P5mJp8IffulKjJaqKQfwNQ/exec',
   APP_NAME: 'i-LPG',
   VERSION: '1.0.0',
   TOKEN_KEY: 'ilpg_token',
@@ -162,6 +162,21 @@ const API = {
   // Purchases
   async createPurchase(data)  { return this.call('create_purchase', data); },
   async getPurchases(filters) { return this.call('get_purchases', filters); },
+
+  /**
+   * Upload foto ke Google Drive via GAS backend.
+   * @param {string} base64DataUrl - dataURL dari canvas.toDataURL()
+   * @param {string} photoType     - 'absensi_in' | 'absensi_out' | 'laporan' | 'pembayaran'
+   * @returns {Promise<string>}      URL Drive publik
+   */
+  async uploadPhoto(base64DataUrl, photoType) {
+    const res = await this.call('upload_photo', {
+      photoData: base64DataUrl,
+      photoType,
+    });
+    if (res?.status === 'ok') return res.data.url;
+    throw new Error(res?.message || 'Upload foto gagal.');
+  },
 };
 
 /* ──────────────────────────────────────────
