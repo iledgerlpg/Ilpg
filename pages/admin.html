@@ -1736,8 +1736,7 @@ async function markAllRead() {
 Sidebar.init();
 Notif.init();
 Page.go('dashboard');
-</script>
-
+<script>
 /* ── Production error handler (no demo fallback) ── */
 function apiErr(e, containerIdOrEl) {
   const el = typeof containerIdOrEl === 'string'
@@ -1752,6 +1751,7 @@ function apiErr(e, containerIdOrEl) {
       <button class="btn btn-outline btn-sm" onclick="location.reload()">🔄 Coba Lagi</button>
     </div>`;
 }
+</script>
 
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
 </body>
