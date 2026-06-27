@@ -142,6 +142,9 @@ function routeAction(action, params) {
     'get_refill':    () => actionGetRefill(params),
     'create_refill': () => actionCreateRefill(params),
 
+    // File upload
+    'upload_photo':  () => actionUploadPhoto(params),
+
     // Purchases
     'create_purchase': () => actionCreatePurchase(params),
     'get_purchases':   () => actionGetPurchases(params),
@@ -1575,4 +1578,123 @@ function logError(context, error) {
 
 function DateUtil_today() {
   return new Date().toISOString().split('T')[0];
+}
+
+/* ══════════════════════════════════════════════
+   GOOGLE DRIVE PHOTO UPLOAD
+   ─────────────────────────────────────────────
+   - Terima base64 dataURL dari frontend
+   - Simpan ke folder Drive per perusahaan
+   - Return URL publik yang bisa disimpan di Sheets
+══════════════════════════════════════════════ */
+
+/**
+ * Ambil atau buat folder Drive untuk perusahaan.
+ * Struktur: i-LPG Uploads / {companyCode} / {subfolder}
+ */
+function getDriveFolder(companyCode, subfolder) {
+  const rootName = 'i-LPG Uploads';
+  let rootFolder;
+
+  // Cari atau buat root folder
+  const rootFolders = DriveApp.getFoldersByName(rootName);
+  if (rootFolders.hasNext()) {
+    rootFolder = rootFolders.next();
+  } else {
+    rootFolder = DriveApp.createFolder(rootName);
+  }
+
+  // Subfolder perusahaan
+  let compFolder;
+  const compFolders = rootFolder.getFoldersByName(companyCode);
+  if (compFolders.hasNext()) {
+    compFolder = compFolders.next();
+  } else {
+    compFolder = rootFolder.createFolder(companyCode);
+  }
+
+  if (!subfolder) return compFolder;
+
+  // Subfolder tipe foto (absensi / laporan / pembayaran)
+  let typeFolder;
+  const typeFolders = compFolder.getFoldersByName(subfolder);
+  if (typeFolders.hasNext()) {
+    typeFolder = typeFolders.next();
+  } else {
+    typeFolder = compFolder.createFolder(subfolder);
+  }
+  return typeFolder;
+}
+
+/**
+ * Upload base64 dataURL ke Google Drive.
+ * @param {string} base64Data  - Format: "data:image/jpeg;base64,/9j/..."
+ * @param {string} filename    - Nama file, misal "absensi_USR001_20240101_083000.jpg"
+ * @param {string} companyCode - Kode perusahaan untuk folder
+ * @param {string} subfolder   - "absensi" | "laporan" | "pembayaran"
+ * @returns {string} URL publik file di Drive
+ */
+function uploadBase64ToDrive(base64Data, filename, companyCode, subfolder) {
+  // Parse dataURL: "data:image/jpeg;base64,XXXXX"
+  const matches = base64Data.match(/^data:([^;]+);base64,(.+)$/);
+  if (!matches) throw new Error('Format base64 tidak valid.');
+
+  const mimeType  = matches[1];           // e.g. "image/jpeg"
+  const b64String = matches[2];           // data murni
+  const bytes     = Utilities.base64Decode(b64String);
+  const blob      = Utilities.newBlob(bytes, mimeType, filename);
+
+  const folder = getDriveFolder(companyCode, subfolder);
+  const file   = folder.createFile(blob);
+
+  // Set sharing: anyone with link can view (read-only)
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  // Return direct view URL (bisa ditampilkan di <img> tag)
+  // Format: https://drive.google.com/uc?export=view&id=FILE_ID
+  return 'https://drive.google.com/uc?export=view&id=' + file.getId();
+}
+
+/**
+ * Action endpoint: terima foto base64, upload ke Drive, return URL.
+ * Frontend kirim: { action: 'upload_photo', photoData, filename, photoType }
+ * photoType: 'absensi_in' | 'absensi_out' | 'laporan' | 'pembayaran'
+ */
+function actionUploadPhoto(params) {
+  try {
+    const user      = params._user;
+    const photoData = params.photoData;
+    const photoType = params.photoType || 'misc';
+
+    if (!photoData) return { status: 'error', message: 'Data foto kosong.' };
+
+    // Validasi ukuran — base64 string > 5MB (sekitar 6.7M karakter) ditolak
+    if (photoData.length > 7_000_000) {
+      return { status: 'error', message: 'Foto terlalu besar. Maksimal 5MB.' };
+    }
+
+    // Buat nama file unik: type_userId_timestamp.jpg
+    const ts       = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const filename = `${photoType}_${user.id}_${ts}.jpg`;
+
+    // Tentukan subfolder berdasarkan tipe
+    const subfolderMap = {
+      absensi_in:  'absensi',
+      absensi_out: 'absensi',
+      laporan:     'laporan',
+      pembayaran:  'pembayaran',
+    };
+    const subfolder = subfolderMap[photoType] || 'misc';
+
+    const url = uploadBase64ToDrive(photoData, filename, user.company, subfolder);
+
+    writeAuditLog(getMasterSS(), user, 'create',
+      `Upload foto ${photoType}: ${filename}`, user.company);
+
+    return { status: 'ok', data: { url, filename } };
+
+  } catch (e) {
+    logError('actionUploadPhoto', e);
+    return { status: 'error', message: 'Upload foto gagal: ' + e.message };
+  }
 }

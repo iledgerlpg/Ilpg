@@ -413,7 +413,9 @@ function openTambahUser() {
   document.getElementById('modal-user-title').textContent = 'Tambah User Baru';
   Form.reset('user-form');
   document.getElementById('user-id').value = '';
-  document.getElementById('pass-group').style.display = 'block';
+  const passGroup = document.getElementById('pass-group');
+  passGroup.style.display = 'block';
+  passGroup.querySelector('input').required = true;
   Modal.open('modal-user');
 }
 
@@ -422,13 +424,28 @@ function openEditUser(id) {
   if(!item) return;
   document.getElementById('modal-user-title').textContent = 'Edit User';
   Form.setValues('user-form', item);
-  document.getElementById('pass-group').style.display = 'none'; // password di reset terpisah
+  const passGroup = document.getElementById('pass-group');
+  passGroup.style.display = 'none';
+  passGroup.querySelector('input').required = false; // tidak wajib saat edit
+  passGroup.querySelector('input').value = '';       // kosongkan supaya tidak terkirim
   Modal.open('modal-user');
 }
 
 async function saveUser() {
   const data = Form.getData('user-form');
   if(!data.name||!data.username||!data.role){Toast.warning('Form Tidak Lengkap');return;}
+
+  // Saat tambah baru, password wajib ada
+  if (!data.id && (!data.password || data.password.length < 6)) {
+    Toast.warning('Password Terlalu Pendek','Password minimal 6 karakter.');
+    return;
+  }
+
+  // Saat edit, hapus password dari payload supaya tidak override
+  if (data.id && !data.password) {
+    delete data.password;
+  }
+
   Loading.show();
   try {
     const res = data.id ? await API.updateUser(data.id, data) : await API.createUser(data);

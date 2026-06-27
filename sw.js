@@ -3,18 +3,20 @@
  * PWA Offline Support & Caching Strategy
  */
 
-const CACHE_NAME   = 'ilpg-v1.0.0';
-const STATIC_CACHE = 'ilpg-static-v1';
-const API_CACHE    = 'ilpg-api-v1';
+const CACHE_NAME   = 'ilpg-v1.1.0';
+const STATIC_CACHE = 'ilpg-static-v2';
+const API_CACHE    = 'ilpg-api-v2';
 
 // Files to cache for offline use
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/offline.html',
+  '/registerpt.html',
   '/css/style.css',
   '/js/app.js',
   '/js/charts.js',
+  '/js/profile.js',
   '/manifest.json',
   '/pages/driver.html',
   '/pages/admin.html',

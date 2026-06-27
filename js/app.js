@@ -10,7 +10,7 @@
    CONFIG
 ────────────────────────────────────────── */
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbyKk3Etd9vg-bgeJZkULlZctwQiSjajakV-kUv1K6WJDqQlkQcSgwmoosi5nyGBgetXtg/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbyDpYjYN3QmLTcVmL7d7Xw8aHZUQaZNAbbutRWHnDJEyy9-gq4s7x5JxkrUXrOGGInR/exec',
   APP_NAME: 'i-LPG',
   VERSION: '1.0.0',
   TOKEN_KEY: 'ilpg_token',
@@ -507,27 +507,31 @@ const Camera = {
     const lines = [name, date + ' ' + time, location].filter(Boolean);
 
     const padding = 12;
-    const lineH = 20;
-    const boxH = lines.length * lineH + padding * 2;
-    const boxW = 320;
-    const x = canvasEl.width - boxW - 12;
-    const y = canvasEl.height - boxH - 12;
+    const lineH   = 20;
+    const boxH    = lines.length * lineH + padding * 2;
+    const boxW    = 320;
+    const x       = canvasEl.width  - boxW - 12;
+    const y       = canvasEl.height - boxH - 12;
 
-    // Box background
+    // Box background — use rect fallback if roundRect not supported (Safari <16)
     ctx.fillStyle = 'rgba(0,0,0,0.65)';
-    ctx.beginPath();
-    ctx.roundRect(x, y, boxW, boxH, 8);
-    ctx.fill();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.beginPath();
+      ctx.roundRect(x, y, boxW, boxH, 8);
+      ctx.fill();
+    } else {
+      ctx.fillRect(x, y, boxW, boxH);
+    }
 
-    // Text
+    // Watermark text
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 13px monospace';
     lines.forEach((line, i) => {
       ctx.fillText(line, x + padding, y + padding + 14 + i * lineH);
     });
 
-    // Brand watermark
-    ctx.fillStyle = 'rgba(232,93,4,0.8)';
+    // Brand tag bottom-left
+    ctx.fillStyle = 'rgba(232,93,4,0.85)';
     ctx.fillRect(12, canvasEl.height - 34, 90, 22);
     ctx.fillStyle = 'white';
     ctx.font = 'bold 12px sans-serif';
