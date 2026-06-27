@@ -7,14 +7,14 @@
 
 /* ── CSS Variables ── */
 :root {
-  /* Brand Palette */
-  --primary:        #E85D04;
-  --primary-dark:   #C44D03;
-  --primary-light:  #FF7B2B;
-  --primary-alpha:  rgba(232, 93, 4, 0.12);
+  /* Brand Palette — Blue */
+  --primary:        #1D6FE8;
+  --primary-dark:   #1558C4;
+  --primary-light:  #4D93FF;
+  --primary-alpha:  rgba(29, 111, 232, 0.12);
 
-  --accent:         #F48C06;
-  --accent-light:   #FAA307;
+  --accent:         #2A8CF4;
+  --accent-light:   #5BAAF7;
 
   --success:        #2DC653;
   --warning:        #FFB703;
@@ -24,8 +24,8 @@
   /* Light Mode */
   --bg:             #F7F7F8;
   --bg-card:        #FFFFFF;
-  --bg-sidebar:     #1A1A2E;
-  --bg-sidebar-sec: #16213E;
+  --bg-sidebar:     #0D1B3E;
+  --bg-sidebar-sec: #0A1630;
   --bg-input:       #F0F0F3;
 
   --text-primary:   #0D0D0D;
@@ -63,15 +63,15 @@
 
 /* Dark Mode */
 [data-theme="dark"] {
-  --bg:             #0F0F14;
-  --bg-card:        #1A1A24;
-  --bg-sidebar:     #0D0D12;
-  --bg-sidebar-sec: #111118;
-  --bg-input:       #222230;
+  --bg:             #0A0F1E;
+  --bg-card:        #111827;
+  --bg-sidebar:     #070D1C;
+  --bg-sidebar-sec: #060B18;
+  --bg-input:       #1A2540;
 
   --text-primary:   #F0F0F5;
   --text-secondary: #9090A8;
-  --text-muted:     #6060780;
+  --text-muted:     #606078;
 
   --border:         rgba(255,255,255,0.08);
   --shadow-sm:      0 1px 3px rgba(0,0,0,0.3);
@@ -433,7 +433,7 @@ body {
   flex-shrink: 0;
 }
 
-.stat-icon.orange { background: rgba(232, 93, 4, 0.12); color: var(--primary); }
+.stat-icon.orange { background: rgba(29, 111, 232, 0.12); color: var(--primary); }
 .stat-icon.green  { background: rgba(45, 198, 83, 0.12); color: var(--success); }
 .stat-icon.yellow { background: rgba(255, 183, 3, 0.12); color: var(--warning); }
 .stat-icon.blue   { background: rgba(67, 97, 238, 0.12); color: var(--info); }
@@ -1060,7 +1060,7 @@ tbody td {
   content: '';
   position: absolute;
   width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(232,93,4,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(29,111,232,0.15) 0%, transparent 70%);
   top: -200px; right: -200px;
   border-radius: 50%;
 }
@@ -1069,7 +1069,7 @@ tbody td {
   content: '';
   position: absolute;
   width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(244,140,6,0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(42,140,244,0.08) 0%, transparent 70%);
   bottom: -100px; left: -100px;
   border-radius: 50%;
 }
@@ -1100,7 +1100,7 @@ tbody td {
   font-size: 28px;
   font-weight: 900;
   color: white;
-  box-shadow: 0 8px 24px rgba(232,93,4,0.4);
+  box-shadow: 0 8px 24px rgba(29,111,232,0.4);
 }
 
 .login-logo h1 {
