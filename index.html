@@ -215,9 +215,9 @@
 
   function redirectByRole(role) {
     const map = {
-      driver: 'pages/driver.html',
-      admin:  'pages/admin.html',
-      hrd:    'pages/hrd.html',
+      driver: 'pages/driver',
+      admin:  'pages/admin',
+      hrd:    'pages/hrd',
     };
     window.location.href = '/' + (map[role] || 'pages/driver.html');
   }
